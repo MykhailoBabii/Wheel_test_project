@@ -15,25 +15,25 @@ namespace Game.UI
 
 
         [ContextMenu("Draw")]
-        public void PrepareWheel(List<SpinData> spinDatas)
+        public void PrepareWheel(List<SegmentData> segmentDatas)
         {
-            var sectionCount = spinDatas.Count;
+            var sectionCount = segmentDatas.Count;
             float angleZ = 360f / (float)sectionCount;
             var rotation = new Vector3();
 
-            for (int i = 0; i < spinDatas.Count; i++)
+            for (int i = 0; i < segmentDatas.Count; i++)
             {
                 rotation.z = angleZ * (float)i;
-                var sprite = spinDatas[i].Sprite;
-                var count = $"{spinDatas[i].Count}X";
+                var sprite = segmentDatas[i].Sprite;
+                var count = $"{segmentDatas[i].Count}X";
                 var sectionImage = Instantiate(_sectionImage, transform);
 
                 sectionImage.SetFillAmount(1f / (float)sectionCount);
                 sectionImage.SetRotation(rotation);
                 sectionImage.SetContent(count, sprite);
 
-                _sectionAngleDict[spinDatas[i].ListIndex] = angleZ / 2 - angleZ * i;
-                _sectionViewDict[spinDatas[i].ListIndex] = sectionImage;
+                _sectionAngleDict[segmentDatas[i].ListIndex] = angleZ / 2 - angleZ * i;
+                _sectionViewDict[segmentDatas[i].ListIndex] = sectionImage;
             }
         }
 

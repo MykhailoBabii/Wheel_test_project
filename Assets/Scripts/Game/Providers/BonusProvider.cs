@@ -27,7 +27,7 @@ namespace Game.Settings
 
     }
 
-    public class SpinData
+    public class SegmentData
     {
         public ItemName ItemName { get; private set; }
         public int Count { get; private set; }
@@ -36,7 +36,7 @@ namespace Game.Settings
         public Sprite Sprite { get; private set; }
         
 
-        public SpinData(ItemName itemName, int count, int listIndex, Sprite sprite, float probability)
+        public SegmentData(ItemName itemName, int count, int listIndex, Sprite sprite, float probability)
         {
             ItemName = itemName;
             Count = count;

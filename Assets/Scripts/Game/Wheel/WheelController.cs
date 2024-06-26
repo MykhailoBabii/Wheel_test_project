@@ -26,9 +26,9 @@ namespace Game.Wheel
         private BoolProperty _canSpin = new(true);
         private IntProperty _spinAttempt = new(0);
         private IntProperty _spinPrice = new(0);
-        private List<SpinData> _currentSpinDataList = new();
-        private List<SpinData> _firstSpins = new();
-        private SpinData _currentSpinData;
+        private List<SegmentData> _currentSegmentDataList = new();
+        private List<SegmentData> _firstSpins = new();
+        private SegmentData _currentSegmentData;
 
         protected readonly BonusProvider _bonusProvider;
         protected readonly WheelSettings _wheelSettings;
@@ -65,8 +65,8 @@ namespace Game.Wheel
 
         public void PrepareWheel()
         {
-            _currentSpinDataList = GenerateSpinBonusList();
-            _wheelView.PrepareWheel(_currentSpinDataList);
+            _currentSegmentDataList = GenerateSpinBonusList();
+            _wheelView.PrepareWheel(_currentSegmentDataList);
         }
 
         public void TrySpin()
@@ -76,17 +76,17 @@ namespace Game.Wheel
 
         private void ApplyBonus()
         {
-            _bonusResolver.Resolve(_currentSpinData.ItemName, _currentSpinData.Count);
+            _bonusResolver.Resolve(_currentSegmentData.ItemName, _currentSegmentData.Count);
         }
 
         private void Spin()
         {
             _spinAttempt.Plus(1);
             _canSpin.SetValue(false);
-            _currentSpinData = GetRandomSpinData();
+            _currentSegmentData = GetRandomSegmentData();
             var spinTime = _wheelSettings.SpinTime;
             var spinCount = _wheelSettings.SpinCount;
-            var bonusIndex = _currentSpinData.ListIndex;
+            var bonusIndex = _currentSegmentData.ListIndex;
             _wheelView.SpinToSection(bonusIndex, spinTime, spinCount, OnSpinComplete);
         }
 
@@ -109,12 +109,12 @@ namespace Game.Wheel
                 Debug.Log($"Can spin {_canSpin.Value}");
             }
 
-            // _currentSpinDataList = ListTools.GetShuffleList(_currentSpinDataList);
+            // _currentSegmentDataList = ListTools.GetShuffleList(_currentSegmentDataList);
         }
 
-        private List<SpinData> GenerateSpinBonusList()
+        private List<SegmentData> GenerateSpinBonusList()
         {
-            List<SpinData> spinDatas = new();
+            List<SegmentData> segmentDatas = new();
             var bonusDatas = _bonusProvider.GetBonuses();
             var shuffleList = ListTools.GetShuffleList(bonusDatas);
             var bonusDatasList = new List<BonusData>(shuffleList);
@@ -127,20 +127,20 @@ namespace Game.Wheel
                 var count = data.BonusCount;
                 var probability = data.Probability;
                 var sprite = _itemDescriptor.GetItemIcon(type);
-                var spinData = new SpinData(type, count, i, sprite, probability);
+                var segmentData = new SegmentData(type, count, i, sprite, probability);
 
                 if (data.IsFirst == true)
                 {
-                    _firstSpins.Add(spinData);
+                    _firstSpins.Add(segmentData);
                 }
 
-                spinDatas.Add(spinData);
+                segmentDatas.Add(segmentData);
             }
 
-            return spinDatas;
+            return segmentDatas;
         }
 
-        private SpinData GetRandomSpinData()
+        private SegmentData GetRandomSegmentData()
         {
             if (_firstSpins.Count > _spinAttempt.Value)
             {
@@ -151,7 +151,7 @@ namespace Game.Wheel
 
             while (true)
             {
-                var selected = ListTools.GetRandom(_currentSpinDataList);
+                var selected = ListTools.GetRandom(_currentSegmentDataList);
 
                 if (UnityEngine.Random.value < selected.Probability)
                 {
@@ -163,7 +163,7 @@ namespace Game.Wheel
 
         private void CheckToSetAnotherData()
         {
-            var itemName = _currentSpinData.ItemName;
+            var itemName = _currentSegmentData.ItemName;
             var itemType = _itemDescriptor.GetItemData(itemName).ItemType;
 
             switch (itemType)
@@ -185,24 +185,24 @@ namespace Game.Wheel
 
         private void TryChangeBonusItem(ItemName itemName)
         {
-            var bonusIndex = _currentSpinData.ListIndex;
+            var bonusIndex = _currentSegmentData.ListIndex;
             if (itemName == ItemName.None)
             {
-                _currentSpinDataList.Remove(_currentSpinData);
+                _currentSegmentDataList.Remove(_currentSegmentData);
                 _wheelView.BlockSection(bonusIndex);
                 Debug.Log("Any new items are missing");
                 return;
             }
 
             var sprite = _itemDescriptor.GetItemIcon(itemName);
-            var count = _currentSpinData.Count;
-            var probability = _currentSpinData.Probability;
-            var newData = new SpinData(itemName, count, bonusIndex, sprite, probability);
-            var section = _wheelView.GetSection(_currentSpinData.ListIndex);
+            var count = _currentSegmentData.Count;
+            var probability = _currentSegmentData.Probability;
+            var newData = new SegmentData(itemName, count, bonusIndex, sprite, probability);
+            var section = _wheelView.GetSection(_currentSegmentData.ListIndex);
 
             section.SetIcon(sprite);
-            _currentSpinDataList.Remove(_currentSpinData);
-            _currentSpinDataList.Add(newData);
+            _currentSegmentDataList.Remove(_currentSegmentData);
+            _currentSegmentDataList.Add(newData);
         }
     }
 }
